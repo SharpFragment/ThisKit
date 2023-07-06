@@ -8,29 +8,29 @@
 import Foundation
 import SwiftUI
 
-final class TKErrorHandler: ObservableObject {
-  static let `default` = TKErrorHandler()
+public final class TKErrorHandler: ObservableObject {
+  public static let `default` = TKErrorHandler()
   
   @Published var error: NSError?
   @Published var didError = false
   
-  enum AnyError:Error {
+  public enum AnyError:Error {
     case any(String)
   }
   
-  func handle(err: NSError) {
+  public func handle(err: NSError) {
     TKLog(err.debugDescription)
     self.error = err
     self.didError = true
   }
   
-  func handle(string: String) {
+  public func handle(string: String) {
     TKLog(string)
     self.error = AnyError.any(string) as NSError
     self.didError = true
   }
   
-  func handle(_ block: (() throws -> Void)) {
+  public func handle(_ block: (() throws -> Void)) {
     do {
       try block()
     } catch let err as NSError {
@@ -45,7 +45,7 @@ final class TKErrorHandler: ObservableObject {
     }
   }
   
-  func handle(_ block: (() async throws -> Void)) async {
+  public func handle(_ block: (() async throws -> Void)) async {
     do {
       try await block()
     } catch let err as NSError {
@@ -60,14 +60,14 @@ final class TKErrorHandler: ObservableObject {
     }
   }
   
-  init(error: NSError? = nil) {
+  public init(error: NSError? = nil) {
     self.error = error
   }
   
-  struct TKErrorHandlerModifier:ViewModifier {
+  public struct TKErrorHandlerModifier:ViewModifier {
     @EnvironmentObject private var errorHandler: TKErrorHandler
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
       content
         .alert(
           "Error!",

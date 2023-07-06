@@ -7,7 +7,7 @@
 
 import Foundation
 
-func TKLog(_ log: Any,
+public func TKLog(_ log: Any,
            file: String = #file,
            line: Int = #line,
            column: Int = #column,
@@ -21,7 +21,7 @@ func TKLog(_ log: Any,
   )
 }
 
-class TKLogger {
+public class TKLogger {
   static let `default` = TKLogger()
   
 //  static let LogsDir = WBInternalURL.documents.appendingPathComponent("Logs",isDirectory: true)
@@ -47,7 +47,7 @@ class TKLogger {
       .appendingPathExtension(for: .text)
   }
   
-  init(logsDir: URL? = nil) {
+  public init(logsDir: URL? = nil) {
     do {
       self.logsDir = logsDir
       guard let logsDir = self.logsDir,
@@ -71,7 +71,7 @@ class TKLogger {
     }
   }
   
-  func cleanOldLogs() {
+  public func cleanOldLogs() {
     do {
       guard let logsDir = self.logsDir else { return }
       let urls = try FileManager.default.contentsOfDirectory(at: logsDir, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
@@ -93,7 +93,7 @@ class TKLogger {
     }
   }
   
-  func log(_ log: Any,
+  public func log(_ log: Any,
              file: String = #file,
              line: Int = #line,
              column: Int = #column,
@@ -111,7 +111,7 @@ class TKLogger {
     #endif
   }
   
-  func logToFile(log:String) {
+  public func logToFile(log:String) {
     do {
       guard let fileHandler = fileHandler else {
         return
