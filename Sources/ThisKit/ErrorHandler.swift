@@ -67,6 +67,8 @@ public final class TKErrorHandler: ObservableObject {
   public struct TKErrorHandlerModifier:ViewModifier {
     @EnvironmentObject private var errorHandler: TKErrorHandler
 
+    public init() {}
+    
     public func body(content: Content) -> some View {
       content
         .alert(
