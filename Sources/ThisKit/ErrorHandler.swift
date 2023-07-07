@@ -11,37 +11,35 @@ import SwiftUI
 public final class TKErrorHandler: ObservableObject {
   public static let `default` = TKErrorHandler()
   
-  @Published var error: NSError?
-  @Published var didError = false
+  @MainActor @Published var error: NSError?
+  @MainActor @Published var didError = false
   
   public enum AnyError:Error {
     case any(String)
   }
   
   public func handle(err: NSError) {
-    TKLog(err.debugDescription)
-    self.error = err
-    self.didError = true
+    Task {
+      await MainActor.run {
+        TKLog(err.debugDescription)
+        self.error = err
+        self.didError = true
+      }
+    }
   }
   
   public func handle(string: String) {
-    TKLog(string)
-    self.error = AnyError.any(string) as NSError
-    self.didError = true
+    self.handle(err: AnyError.any(string) as NSError)
   }
   
   public func handle(_ block: (() throws -> Void)) {
     do {
       try block()
     } catch let err as NSError {
-      TKLog(err.debugDescription)
-      self.error = err
-      self.didError = true
+      self.handle(err: err)
     } catch let any {
-      let err = AnyError.any(any.localizedDescription)
-      self.error = err as NSError
-      self.didError = true
-      TKLog(any.localizedDescription)
+      let err = AnyError.any(any.localizedDescription) as NSError
+      self.handle(err: err)
     }
   }
   
@@ -49,20 +47,14 @@ public final class TKErrorHandler: ObservableObject {
     do {
       try await block()
     } catch let err as NSError {
-      TKLog(err.debugDescription)
-      self.error = err
-      self.didError = true
+      self.handle(err: err)
     } catch let any {
-      let err = AnyError.any(any.localizedDescription)
-      self.error = err as NSError
-      self.didError = true
-      TKLog(any.localizedDescription)
+      let err = AnyError.any(any.localizedDescription) as NSError
+      self.handle(err: err)
     }
   }
   
-  public init(error: NSError? = nil) {
-    self.error = error
-  }
+  public init() {}
   
   public struct TKErrorHandlerModifier:ViewModifier {
     @EnvironmentObject private var errorHandler: TKErrorHandler
@@ -85,7 +77,7 @@ public final class TKErrorHandler: ObservableObject {
             case TKErrorHandler.AnyError.any(let str):
               Text(str)
             default:
-              Text(err.localizedDescription)
+              Text(err.debugDescription)
             }
           }
     }
