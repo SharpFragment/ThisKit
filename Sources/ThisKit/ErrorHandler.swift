@@ -11,6 +11,7 @@ import SwiftUI
 public final class TKErrorHandler: ObservableObject {
   public static let `default` = TKErrorHandler()
   
+  let logger: TKLogger
   @MainActor @Published var error: NSError?
   @MainActor @Published var didError = false
   
@@ -18,10 +19,14 @@ public final class TKErrorHandler: ObservableObject {
     case any(String)
   }
   
+  public init(logger: TKLogger = TKLogger(category: "TKErrorHandler")) {
+    self.logger = logger
+  }
+  
   public func handle(err: NSError) {
     Task {
       await MainActor.run {
-        TKLog(err.debugDescription)
+        logger.error(err.debugDescription)
         self.error = err
         self.didError = true
       }
@@ -53,8 +58,6 @@ public final class TKErrorHandler: ObservableObject {
       self.handle(err: err)
     }
   }
-  
-  public init() {}
   
   public struct TKErrorHandlerModifier:ViewModifier {
     @EnvironmentObject private var errorHandler: TKErrorHandler
