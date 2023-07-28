@@ -7,7 +7,7 @@ let package = Package(
     name: "ThisKit",
     platforms: [
       .iOS(.v15),
-      .macOS(.v10_15),
+      .macOS(.v13),
       .tvOS(.v13),
       .watchOS(.v6),
     ],
