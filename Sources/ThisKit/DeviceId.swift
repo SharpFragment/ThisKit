@@ -10,12 +10,12 @@ import Foundation
 import UIKit
 #endif
 
-struct Device {
-  static let debugSimulatorIdentifier = UUID(uuidString: "00000000-19DD-0000-0000-CC7DB2958ABA")
-  static let debugGeneralIdentifier = UUID(uuidString: "11111111-19DD-0000-0000-CC7DB2958ABA")
-  static var macosIdStoreageKey = "macOSDeviceIdKey"
+public struct Device {
+  public static let debugSimulatorIdentifier = UUID(uuidString: "00000000-19DD-0000-0000-CC7DB2958ABA")
+  public static let debugGeneralIdentifier = UUID(uuidString: "11111111-19DD-0000-0000-CC7DB2958ABA")
+  public static var macosIdStoreageKey = "macOSDeviceIdKey"
   
-  static func id() -> UUID? {
+  public static func id() -> UUID? {
     #if DEBUG
     if RuntimeInfo.isSimulator {
       return Self.debugSimulatorIdentifier

@@ -8,23 +8,23 @@
 import Foundation
 
 // https://theswiftdev.com/how-to-use-icloud-drive-documents/
-class ICloudFileManager {
-  enum PIFileManagerError: Error {
+public class ICloudFileManager {
+  public enum PIFileManagerError: Error {
     case iCloudStorageIsUnavailable
   }
 
-  var containerUrl: URL
+  public let containerUrl: URL
 
-  var syncDirUrl: URL {
+  public var syncDirUrl: URL {
     containerUrl.appendingPathComponent("Sync", isDirectory: true)
   }
   
-  var currentDeviceSyncDir: URL {
+  public var currentDeviceSyncDir: URL {
     syncDirUrl
       .appendingPathComponent(Device.id()!.uuidString, isDirectory: true)
   }
 
-  init() throws {
+  public init() throws {
     guard let url = FileManager.default.url(forUbiquityContainerIdentifier: nil) else {
       TKLog("\(PIFileManagerError.iCloudStorageIsUnavailable)")
       throw PIFileManagerError.iCloudStorageIsUnavailable
@@ -33,29 +33,29 @@ class ICloudFileManager {
     try self.initSyncDir()
   }
   
-  func initSyncDir() throws {
+  public func initSyncDir() throws {
     try findOrCreateSyncDir()
     try findOrCreateCurrentDeviceSyncDir()
     try manualTriggerSync()
   }
 
-  func findOrCreateSyncDir() throws {
+  public func findOrCreateSyncDir() throws {
     try FileManager.default.findOrCreateDir(at: syncDirUrl)
   }
 
-  func findOrCreateCurrentDeviceSyncDir() throws {
+  public func findOrCreateCurrentDeviceSyncDir() throws {
     try FileManager.default.findOrCreateDir(at: currentDeviceSyncDir)
   }
   
   /// By touch a file
-  func manualTriggerSync() throws {
+  public func manualTriggerSync() throws {
     let url = syncDirUrl.appendingPathComponent(UUID().uuidString, isDirectory: false)
     if FileManager.default.createFile(atPath: url.path, contents: "Manual Trigger Sync".data(using: .utf8)) {
       try FileManager.default.removeIfExists(at: url)
     }
   }
 
-  func forceWrite(at url: URL, data: Data) throws {
+  public func forceWrite(at url: URL, data: Data) throws {
     if FileManager.default.fileExists(atPath: url.path, isDirectory: nil) {
       try FileManager.default.removeItem(at: url)
     }
@@ -64,7 +64,7 @@ class ICloudFileManager {
   }
   
   /// https://medium.com/@RomainP_design/download-a-file-from-icloud-swift-4-ad074494b8c9
-  func downloadICloudFile(from url: URL) async throws {
+  public func downloadICloudFile(from url: URL) async throws {
     try FileManager.default.startDownloadingUbiquitousItem(at: url)
     var lastPathComponent = url.lastPathComponent
     if lastPathComponent.contains(".icloud") {
@@ -87,7 +87,7 @@ class ICloudFileManager {
   }
 
   /// include sync download
-  func contentsOfDirectory(at url: URL, includingPropertiesForKeys keys: [URLResourceKey]?, options mask: FileManager.DirectoryEnumerationOptions = []) async throws -> [URL] {
+  public func contentsOfDirectory(at url: URL, includingPropertiesForKeys keys: [URLResourceKey]?, options mask: FileManager.DirectoryEnumerationOptions = []) async throws -> [URL] {
     let urls = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: keys, options: mask)
     for url in urls {
       try await downloadICloudFile(from: url)
@@ -97,7 +97,7 @@ class ICloudFileManager {
   }
 
   /// Dangerous
-  func cleanAllSync() -> Result<Void, Error> {
+  public func cleanAllSync() -> Result<Void, Error> {
     do {
       try FileManager.default.removeIfExists(at: syncDirUrl)
     } catch {
