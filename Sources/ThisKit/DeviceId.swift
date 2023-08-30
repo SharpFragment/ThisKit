@@ -15,7 +15,7 @@ struct Device {
   static let debugGeneralIdentifier = UUID(uuidString: "11111111-19DD-0000-0000-CC7DB2958ABA")
   static var macosIdStoreageKey = "macOSDeviceIdKey"
   
-  func id() -> UUID? {
+  static func id() -> UUID? {
     #if DEBUG
     if RuntimeInfo.isSimulator {
       return Self.debugSimulatorIdentifier

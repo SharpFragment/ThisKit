@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TKRuntimeInfo {
+public struct RuntimeInfo {
   private static let receiptPath = Bundle.main.appStoreReceiptURL?.path ?? ""
   public static let isTestFlight = receiptPath.contains("sandboxReceipt")
   public static let isSimulator = receiptPath.contains("CoreSimulator")
