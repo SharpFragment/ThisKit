@@ -5,39 +5,39 @@
 //  Created by hexagram on 2023/7/6.
 //
 
+import AsyncAlgorithms
 import Foundation
 import SwiftUI
 
 public final class TKErrorHandler: ObservableObject {
   public static let `default` = TKErrorHandler()
-  
+
   let logger: TKLogger
-  @MainActor @Published var error: NSError?
-  @MainActor @Published var didError = false
-  
-  public enum AnyError:Error {
+
+  @MainActor public let errorQueue: AsyncChannel<NSError> = .init()
+//  @MainActor @Published var error: NSError?
+//  @MainActor @Published var didError = false
+
+  public enum AnyError: Error {
     case any(String)
   }
-  
+
   public init(logger: TKLogger = TKLogger(category: "TKErrorHandler")) {
     self.logger = logger
   }
-  
+
   public func handle(err: NSError) {
     Task {
-      await MainActor.run {
-        logger.error(err.debugDescription)
-        self.error = err
-        self.didError = true
-      }
+      logger.error(err.debugDescription)
+      await self.errorQueue.send(err)
     }
   }
-  
+
   public func handle(string: String) {
-    self.handle(err: AnyError.any(string) as NSError)
+    handle(err: AnyError.any(string) as NSError)
   }
-  
-  public func handle(_ block: (() throws -> Void)) {
+
+  public func handle(_ block: () throws -> Void) {
     do {
       try block()
     } catch let err as NSError {
@@ -47,8 +47,8 @@ public final class TKErrorHandler: ObservableObject {
       self.handle(err: err)
     }
   }
-  
-  public func handle(_ block: (() async throws -> Void)) async {
+
+  public func handle(_ block: () async throws -> Void) async {
     do {
       try await block()
     } catch let err as NSError {
@@ -58,31 +58,38 @@ public final class TKErrorHandler: ObservableObject {
       self.handle(err: err)
     }
   }
-  
-  public struct TKErrorHandlerModifier:ViewModifier {
+
+  public struct TKErrorHandlerModifier: ViewModifier {
     @EnvironmentObject private var errorHandler: TKErrorHandler
+    @State private var didError = false
+    @State private var error: NSError? = nil
 
     public init() {}
-    
+
     public func body(content: Content) -> some View {
       content
+        .task {
+          for await err in self.errorHandler.errorQueue {
+            didError = true
+            error = err
+          }
+        }
         .alert(
           "Error!",
-          isPresented: $errorHandler.didError,
-          presenting: errorHandler.error) { err in
+          isPresented: $didError,
+          presenting: error) { _ in
             Button(role: .cancel) {
-              
             } label: {
               Text("OK")
             }
-          } message: { err in
-            switch err as Error {
-            case TKErrorHandler.AnyError.any(let str):
-              Text(str)
-            default:
-              Text(err.debugDescription)
-            }
+        } message: { err in
+          switch err as Error {
+          case let TKErrorHandler.AnyError.any(str):
+            Text(str)
+          default:
+            Text(err.debugDescription)
           }
+        }
     }
   }
 }

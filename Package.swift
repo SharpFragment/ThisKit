@@ -18,11 +18,19 @@ let package = Package(
             targets: ["ThisKit"]
         ),
     ],
+    dependencies: [
+      // Dependencies declare other packages that this package depends on.
+       .package(url: "https://github.com/apple/swift-async-algorithms", from: "0.1.0")
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "ThisKit"),
+            name: "ThisKit",
+            dependencies: [
+              .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
+            ]
+        ),
         .testTarget(
             name: "ThisKitTests",
             dependencies: ["ThisKit"]),
