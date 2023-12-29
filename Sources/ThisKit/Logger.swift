@@ -16,6 +16,15 @@ public func TKLog(_ message: String,
   TKLogger.default.log(message, file: file, line: line, column: column, function: function)
 }
 
+public func TKLog(_ message: String,
+                  file: String = #file,
+                  line: Int = #line,
+                  column: Int = #column,
+                  function: String = #function) -> String {
+  TKLogger.default.log(message, file: file, line: line, column: column, function: function)
+  return "\(function): \(message)"
+}
+
 // TODO: export use OSLogStore
 public class TKLogger {
   public static let `default` = TKLogger()
