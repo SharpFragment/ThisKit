@@ -16,7 +16,7 @@ public func TKLog(_ message: String,
   TKLogger.default.log(message, file: file, line: line, column: column, function: function)
 }
 
-public func TKLog(_ message: String,
+public func TKLogRS(_ message: String,
                   file: String = #file,
                   line: Int = #line,
                   column: Int = #column,
